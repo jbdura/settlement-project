@@ -1,0 +1,28 @@
+# =========================
+# Python / Django
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.env
+.env.*
+
+# Virtual environments
+venv/
+.venv/
+backend/venv/
+
+# =========================
+# Node / Frontend
+# =========================
+node_modules/
+frontend/node_modules/
+
+# =========================
+# OS / Editor junk
+# =========================
+.DS_Store
+.idea/
+.vscode/
+
