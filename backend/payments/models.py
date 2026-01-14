@@ -67,7 +67,6 @@ class Payment(models.Model):
 
 
 class Fee(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     method = models.CharField(
         max_length=10,
         choices=PaymentMethod,
