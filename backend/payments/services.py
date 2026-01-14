@@ -4,6 +4,7 @@ from decimal import Decimal
 from django.db import transaction
 from django.db.models import Sum, Q
 from .models import Merchant, Payment, Fee, Settlement, PaymentStatus
+import uuid
 
 
 class SettlementService:
@@ -16,7 +17,7 @@ class SettlementService:
 
     @staticmethod
     @transaction.atomic
-    def process_settlement_for_merchant(merchant_id: int) -> Settlement:
+    def process_settlement_for_merchant(merchant_id: str) -> Settlement:
         """
         Process settlement for a specific merchant
 
@@ -27,6 +28,10 @@ class SettlementService:
         4. Calculate net amount
         5. Create settlement record
         """
+        # Convert string UUID to UUID object if needed
+        if isinstance(merchant_id, str):
+            merchant_id = uuid.UUID(merchant_id)
+
         merchant = Merchant.objects.get(id=merchant_id)
 
         # Get all successful payments that haven't been settled
@@ -83,12 +88,12 @@ class SettlementService:
         for merchant in merchants_with_payments:
             try:
                 settlement = SettlementService.process_settlement_for_merchant(
-                    merchant.id
+                    str(merchant.id)
                 )
                 settlements.append(settlement)
             except Exception as e:
                 errors.append({
-                    'merchant_id': merchant.id,
+                    'merchant_id': str(merchant.id),
                     'merchant_name': merchant.name,
                     'error': str(e)
                 })
@@ -101,8 +106,12 @@ class SettlementService:
         }
 
     @staticmethod
-    def get_merchant_summary(merchant_id: int):
+    def get_merchant_summary(merchant_id: str):
         """Get payment summary for a merchant"""
+        # Convert string UUID to UUID object if needed
+        if isinstance(merchant_id, str):
+            merchant_id = uuid.UUID(merchant_id)
+
         merchant = Merchant.objects.get(id=merchant_id)
 
         payments = Payment.objects.filter(merchant=merchant)
