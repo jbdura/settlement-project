@@ -378,6 +378,7 @@ INSERT INTO transactions (id, merchant_id, amount, currency, status) VALUES (3, 
 ## 🤝 Credits
 
 Built for the Pesapal Junior Developer Challenge 2026.
+Claude AI for creating README, docstrings, and debugging 
 
 This project demonstrates:
 - Systems programming (building a database from scratch)
