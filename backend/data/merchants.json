@@ -1,0 +1,42 @@
+{
+  "schema": {
+    "columns": {
+      "id": {
+        "type": "INT",
+        "nullable": false,
+        "unique": false,
+        "primary_key": true
+      },
+      "name": {
+        "type": "VARCHAR",
+        "nullable": false,
+        "unique": false,
+        "primary_key": false,
+        "size": 255
+      },
+      "email": {
+        "type": "VARCHAR",
+        "nullable": true,
+        "unique": true,
+        "primary_key": false,
+        "size": 255
+      },
+      "account_number": {
+        "type": "VARCHAR",
+        "nullable": true,
+        "unique": false,
+        "primary_key": false,
+        "size": 50
+      },
+      "status": {
+        "type": "VARCHAR",
+        "nullable": true,
+        "unique": false,
+        "primary_key": false,
+        "size": 20
+      }
+    }
+  },
+  "rows": [],
+  "next_id": 1
+}

@@ -1,0 +1,39 @@
+{
+  "schema": {
+    "columns": {
+      "id": {
+        "type": "INT",
+        "nullable": false,
+        "unique": false,
+        "primary_key": true
+      },
+      "merchant_id": {
+        "type": "INT",
+        "nullable": false,
+        "unique": false,
+        "primary_key": false
+      },
+      "total_amount": {
+        "type": "DECIMAL",
+        "nullable": false,
+        "unique": false,
+        "primary_key": false
+      },
+      "status": {
+        "type": "VARCHAR",
+        "nullable": true,
+        "unique": false,
+        "primary_key": false,
+        "size": 20
+      },
+      "settlement_date": {
+        "type": "DATETIME",
+        "nullable": true,
+        "unique": false,
+        "primary_key": false
+      }
+    }
+  },
+  "rows": [],
+  "next_id": 1
+}

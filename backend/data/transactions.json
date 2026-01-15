@@ -1,0 +1,46 @@
+{
+  "schema": {
+    "columns": {
+      "id": {
+        "type": "INT",
+        "nullable": false,
+        "unique": false,
+        "primary_key": true
+      },
+      "merchant_id": {
+        "type": "INT",
+        "nullable": false,
+        "unique": false,
+        "primary_key": false
+      },
+      "amount": {
+        "type": "DECIMAL",
+        "nullable": false,
+        "unique": false,
+        "primary_key": false
+      },
+      "currency": {
+        "type": "VARCHAR",
+        "nullable": true,
+        "unique": false,
+        "primary_key": false,
+        "size": 10
+      },
+      "status": {
+        "type": "VARCHAR",
+        "nullable": true,
+        "unique": false,
+        "primary_key": false,
+        "size": 20
+      },
+      "transaction_date": {
+        "type": "DATETIME",
+        "nullable": true,
+        "unique": false,
+        "primary_key": false
+      }
+    }
+  },
+  "rows": [],
+  "next_id": 1
+}
