@@ -1,100 +1,141 @@
-// app/lib/api.ts
-
-import axios from "axios";
-
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:8000/api/payments";
+  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
+export interface QueryResult {
+  success: boolean;
+  message: string;
+  data?: any[];
+  row_count?: number;
+  affected_rows?: number;
+  inserted_id?: number;
+}
 
-const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
+export interface TableSchema {
+  success: boolean;
+  message: string;
+  data?: {
+    columns: {
+      [key: string]: {
+        type: string;
+        nullable: boolean;
+        unique: boolean;
+        primary_key: boolean;
+        size?: number;
+      };
+    };
+  };
+}
+
+export const api = {
+  // Execute SQL query
+  async executeQuery(sql: string): Promise<QueryResult> {
+    const response = await fetch(`${API_BASE_URL}/query`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ sql }),
+    });
+    return response.json();
   },
-});
 
-// Types
-export interface Merchant {
-  id: string;
-  name: string;
-  settlement_account: string;
-  created_at: string;
-  total_payments?: number;
-  total_revenue?: string;
-}
+  // Get all tables
+  async getTables(): Promise<QueryResult> {
+    const response = await fetch(`${API_BASE_URL}/tables`);
+    return response.json();
+  },
 
-export interface Payment {
-  id: string;
-  merchant: string;
-  merchant_name?: string;
-  amount: string;
-  method: "MPESA" | "CARD" | "BANK";
-  status: "SUCCESS" | "FAILED" | "PENDING";
-  created_at: string;
-}
+  // Get table schema
+  async getTableSchema(tableName: string): Promise<TableSchema> {
+    const response = await fetch(`${API_BASE_URL}/tables/${tableName}`);
+    return response.json();
+  },
 
-export interface Fee {
-  method: "MPESA" | "CARD" | "BANK";
-  percentage: string;
-}
+  // Get table rows
+  async getTableRows(
+    tableName: string,
+    conditions?: Record<string, any>
+  ): Promise<QueryResult> {
+    const params = conditions ? new URLSearchParams(conditions).toString() : "";
+    const url = `${API_BASE_URL}/tables/${tableName}/rows${params ? `?${params}` : ""}`;
+    const response = await fetch(url);
+    return response.json();
+  },
 
-export interface Settlement {
-  id: string;
-  merchant: string;
-  merchant_name?: string;
-  gross_amount: string;
-  fee_amount: string;
-  net_amount: string;
-  created_at: string;
-}
+  // Insert row
+  async insertRow(
+    tableName: string,
+    data: Record<string, any>
+  ): Promise<QueryResult> {
+    const response = await fetch(`${API_BASE_URL}/tables/${tableName}/rows`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  },
 
-export interface MerchantSummary {
-  merchant: string;
-  total_payments: number;
-  successful_payments: number;
-  failed_payments: number;
-  pending_payments: number;
-  total_amount: string;
-  settlements: Settlement[];
-}
+  // Update rows
+  async updateRows(
+    tableName: string,
+    conditions: Record<string, any>,
+    updates: Record<string, any>
+  ): Promise<QueryResult> {
+    const response = await fetch(`${API_BASE_URL}/tables/${tableName}/rows`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ conditions, updates }),
+    });
+    return response.json();
+  },
 
-// API functions
-export const merchantsAPI = {
-  list: () => apiClient.get<{ results: Merchant[] }>("/merchants/"),
-  create: (data: { name: string; settlement_account: string }) =>
-    apiClient.post<Merchant>("/merchants/", data),
-  get: (id: string) => apiClient.get<Merchant>(`/merchants/${id}/`),
-  update: (id: string, data: Partial<Merchant>) =>
-    apiClient.put<Merchant>(`/merchants/${id}/`, data),
-  delete: (id: string) => apiClient.delete(`/merchants/${id}/`),
-  summary: (id: string) =>
-    apiClient.get<MerchantSummary>(`/merchants/${id}/summary/`),
+  // Delete rows
+  async deleteRows(
+    tableName: string,
+    conditions: Record<string, any>
+  ): Promise<QueryResult> {
+    const response = await fetch(`${API_BASE_URL}/tables/${tableName}/rows`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ conditions }),
+    });
+    return response.json();
+  },
+
+  // Execute JOIN
+  async executeJoin(params: {
+    left_table: string;
+    right_table: string;
+    left_key: string;
+    right_key: string;
+    columns?: string[];
+    conditions?: Record<string, any>;
+  }): Promise<QueryResult> {
+    const response = await fetch(`${API_BASE_URL}/join`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(params),
+    });
+    return response.json();
+  },
+
+  // Get merchant report
+  async getMerchantReport(): Promise<QueryResult> {
+    const response = await fetch(`${API_BASE_URL}/merchants/report`);
+    return response.json();
+  },
+
+  // Health check
+  async healthCheck(): Promise<{ status: string; message: string }> {
+    const response = await fetch(`${API_BASE_URL}/health`);
+    return response.json();
+  },
 };
-
-export const paymentsAPI = {
-  list: (params?: { merchant_id?: string; status?: string }) =>
-    apiClient.get<{ results: Payment[] }>("/payments/", { params }),
-  create: (data: { merchant: string; amount: string; method: string }) =>
-    apiClient.post<Payment>("/payments/", data),
-  get: (id: string) => apiClient.get<Payment>(`/payments/${id}/`),
-  updateStatus: (id: string, status: string) =>
-    apiClient.patch<Payment>(`/payments/${id}/update_status/`, { status }),
-};
-
-export const feesAPI = {
-  list: () => apiClient.get<Fee[]>("/fees/"),
-  create: (data: Fee) => apiClient.post<Fee>("/fees/", data),
-  update: (method: string, data: { percentage: string }) =>
-    apiClient.put<Fee>(`/fees/${method}/`, data),
-};
-
-export const settlementsAPI = {
-  list: (params?: { merchant_id?: string }) =>
-    apiClient.get<{ results: Settlement[] }>("/settlements/", { params }),
-  get: (id: string) => apiClient.get<Settlement>(`/settlements/${id}/`),
-  processAll: () => apiClient.post("/settlements/process/"),
-  processMerchant: (merchantId: string) =>
-    apiClient.post(`/settlements/process/${merchantId}/`),
-};
-
-export default apiClient;
